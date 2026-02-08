@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DIVIDEND</title>
+    <style>
+        /* Center the table */
+        #table-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+        }
+
+        /* Style the table */
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            border: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid black;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        #header {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false;">
+    <div id="header">
+        <h2 style="color: grey;"> CORPORATE ACTION - DIVIDEND </h2>
+    </div>
+    <div id="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>COMPANY AND EX-DIVIDEND DATE</th>
+                    <th>DESCRIPTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in feed_items %}
+                <tr>
+                    <td>{{ item.company }}<br>{{ item.ex_date or '-' }}</td>
+                    <td>{{ item.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

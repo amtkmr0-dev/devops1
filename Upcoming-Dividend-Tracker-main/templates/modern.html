@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dividend Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* reuse base tokens; small overrides for this template */
+        :root {
+            --card-radius: 12px;
+        }
+
+        body.dark {
+            --bg: #0f1720;
+            --card-bg: #11151a;
+            --text: #eef2f6;
+            --accent: #7fb8ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 1.2rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            gap: 0.6rem;
+        }
+
+        .dashboard-header h2 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 0.5rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.98rem;
+            min-width: 240px;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.7rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .filter-btn[onclick] {
+            background: transparent;
+            border: 1px solid transparent;
+        }
+
+        .filter-btn.active {
+            background: #333;
+            color: #fff;
+        }
+
+        .theme-toggle {
+            /* kept for backward-compatibility if needed elsewhere */
+            background: var(--card-bg);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 0.35rem 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            padding: 1.6rem 1.2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--card-radius);
+            box-shadow: 0 6px 18px rgba(12, 18, 30, 0.06);
+            border: 1px solid var(--border);
+            padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            min-width: 0;
+            transition: transform 120ms, box-shadow 120ms;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(12, 18, 30, 0.08);
+        }
+
+        .card .company {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.1rem;
+            color: var(--text);
+        }
+
+        .card .ltp {
+            font-size: 0.98rem;
+            font-weight: 600;
+        }
+
+        .card .ltp.negative {
+            color: var(--danger);
+        }
+
+        .card .ltp.positive {
+            color: var(--success);
+        }
+
+        /* Calculator overlay card uses theme variables so dark mode applies correctly */
+        .calculatorOverlay>div {
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 1.4rem 1.2rem;
+            min-width: 260px;
+            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
+            position: relative;
+            max-width: 92vw;
+        }
+
+        /* details modal styling */
+        .details-modal-veil {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+        }
+
+        .details-modal-card {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 12px;
+            max-width: 640px;
+            width: 92%;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+        }
+
+        /* small helper */
+        .muted-small {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .card .ltp-change {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-left: 0.45rem;
+        }
+
+        .card .label {
+            font-size: 0.92rem;
+            color: var(--muted);
+            margin-right: 0.45rem;
+        }
+
+        .card .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            align-items: center;
+        }
+
+        .card .value {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        @media (max-width: 600px) {
+
+            .dashboard-header,
+            .cards {
+                padding: 1rem 2vw;
+            }
+
+            .card {
+                padding: 1rem 0.7rem;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: space-between
+            }
+
+            .controls form {
+                flex: 1 1 100%;
+                display: flex
+            }
+
+            .search-input {
+                flex: 1 1 auto;
+                width: 100%;
+                min-width: 0
+            }
+
+            .dropdown {
+                order: 99
+            }
+
+            .calculatorOverlay>div {
+                width: 94vw;
+                max-width: 480px
+            }
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false;">
+    <div class="dashboard-header">
+        <h2>Corporate Action - Dividend</h2>
+        <div class="controls">
+            <form method="get" style="display:inline;">
+                <input class="search-input" type="text" name="search" placeholder="Search by Stock Name"
+                    value="{{ search }}" />
+                <input type="hidden" name="filter" value="{{ filter_type }}" />
+            </form>
+            <button class="filter-btn{% if filter_type == 'upcoming' %} active{% endif %}"
+                onclick="window.location='/?filter=upcoming&search={{ search }}'">Upcoming</button>
+            <button class="filter-btn{% if filter_type == 'thisweek' %} active{% endif %}"
+                onclick="window.location='/?filter=thisweek&search={{ search }}'">This Week</button>
+            <button class="filter-btn{% if filter_type == 'nextweek' %} active{% endif %}"
+                onclick="window.location='/?filter=nextweek&search={{ search }}'">Next Week</button>
+            <!-- Profile control is provided by base.html; removed duplicate dropdown to avoid layout issues -->
+        </div>
+    </div>
+    <div class="cards">
+        {% for item in feed_items %}
+        <div class="card">
+            <div class="company">{{ item.company }}</div>
+            <div class="row">
+                <span class="label">LTP:</span>
+                <span class="value">{{ item.ltp if item.ltp else '-' }}
+                    {% if item.ltp_change %}
+                    <span
+                        class="ltp {% if item.ltp_change|float >= 0 %}positive{% else %}negative{% endif %} ltp-change">
+                        ({{ item.ltp_change }})
+                    </span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="row">
+                <span class="label">Ex-Date:</span>
+                <span class="value">{{ item.ex_date or '-' }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Announcement Date:</span>
+                <span class="value">{{ item.announcement_date or '-' }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Dividend:</span>
+                <span class="value">{{ item.dividend or '-' }}</span>
+            </div>
+            <div class="row" style="margin-top: 1rem; gap: 0.5rem;">
+                <button type="button" class="btn btn-small" aria-label="Details" title="Details"
+                    class="card-btn details-btn" data-company="{{ item.company }}" data-title="{{ item.title }}"
+                    data-ltp="{{ item.ltp or '' }}" data-dividend="{{ item.dividend or '' }}"
+                    data-exdate="{{ item.ex_date or '' }}"
+                    data-announcement="{{ item.announcement_date or '' }}">Details</button>
+                <button type="button" class="btn btn-small btn-success" aria-label="Add to Watchlist"
+                    title="Add to Watchlist" class="card-btn watchlist-btn"
+                    data-symbol="{{ item.title.split(' - ')[0].strip() }}">+ Watchlist</button>
+                <button type="button" class="btn btn-small btn-ghost" aria-label="Calculator" title="Calculator"
+                    class="card-btn calculator-btn" data-dividend="{{ item.dividend or '0' }}"
+                    data-idx="{{ loop.index0 }}">Calculator</button>
+                <!-- Calculator Overlay (unique per card) -->
+                <div class="calculatorOverlay" id="calculatorOverlay{{ loop.index0 }}"
+                    style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:1000; align-items:center; justify-content:center;">
+                    <div>
+                        <button class="closeCalculator"
+                            style="position:absolute; top:0.7em; right:1em; background:none; border:none; font-size:1.5em; color:#888; cursor:pointer;">&times;</button>
+                        <h3 style="margin-top:0; color:#1976d2;">Dividend Calculator</h3>
+                        <div style="margin:1.2em 0;">
+                            <label style="font-weight:500;">Dividend per Share:</label>
+                            <span class="dividendPerShare" style="font-weight:600; margin-left:0.5em;">0</span>
+                        </div>
+                        <div style="margin:1.2em 0;">
+                            <label style="font-weight:500;">Number of Shares:</label>
+                            <input class="numSharesInput" type="number" min="1" value="1"
+                                style="width:80px; padding:0.4em; margin-left:0.5em; border:1px solid #ccc; border-radius:4px;">
+                        </div>
+                        <div style="margin:1.2em 0;">
+                            <label style="font-weight:500;">Total Dividend:</label>
+                            <span class="totalDividend"
+                                style="font-weight:700; color:#43a047; margin-left:0.5em;">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% if feed_items|length == 0 %}
+        <div style="grid-column: 1/-1; text-align:center; color: #888;">No results found.</div>
+        {% endif %}
+    </div>
+    <!-- Details modal (single shared) -->
+    <div id="detailsModal" class="details-modal-veil" style="display:none;">
+        <div class="details-modal-card">
+            <button id="closeDetails"
+                style="float:right;border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text);">&times;</button>
+            <h3 id="detailsCompany" style="margin-top:0;margin-bottom:0.6rem;"></h3>
+            <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
+                <div><strong>LTP:</strong> <span id="detailsLtp">-</span></div>
+                <div><strong>Dividend:</strong> <span id="detailsDividend">-</span></div>
+                <div><strong>Ex-Date:</strong> <span id="detailsExDate">-</span></div>
+                <div><strong>Announcement:</strong> <span id="detailsAnn">-</span></div>
+            </div>
+            <div style="margin-top:0.8rem;">
+                <p id="detailsTitle" style="color:var(--text);opacity:0.85;margin:0"></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Calculator Overlay logic (unique per card)
+        document.querySelectorAll('.calculator-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const idx = this.getAttribute('data-idx');
+                const overlay = document.getElementById('calculatorOverlay' + idx);
+                const dividend = parseFloat(this.getAttribute('data-dividend')) || 0;
+                const dividendPerShare = overlay.querySelector('.dividendPerShare');
+                const numSharesInput = overlay.querySelector('.numSharesInput');
+                const totalDividend = overlay.querySelector('.totalDividend');
+                dividendPerShare.textContent = dividend;
+                numSharesInput.value = 1;
+                totalDividend.textContent = dividend;
+                overlay.style.display = 'flex';
+                // Close logic
+                overlay.querySelector('.closeCalculator').onclick = function () {
+                    overlay.style.display = 'none';
+                };
+                // Input logic
+                numSharesInput.oninput = function () {
+                    const shares = parseInt(numSharesInput.value) || 0;
+                    totalDividend.textContent = (dividend * shares).toFixed(2);
+                };
+            });
+        });
+        // Theme is handled centrally via the profile dropdown toggle in base.html
+        // Search submit on enter
+        document.querySelector('.search-input').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                this.form.submit();
+            }
+        });
+
+        // Watchlist AJAX
+        document.querySelectorAll('.watchlist-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const symbol = this.getAttribute('data-symbol');
+                fetch('/watchlist/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symbol }),
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.textContent = 'Added!';
+                            this.disabled = true;
+                        } else {
+                            alert(data.error || 'Could not add to watchlist');
+                        }
+                    });
+            });
+        });
+
+        // Details modal logic
+        document.querySelectorAll('.details-btn').forEach(b => {
+            b.addEventListener('click', function () {
+                const modal = document.getElementById('detailsModal');
+                document.getElementById('detailsCompany').textContent = this.getAttribute('data-company') || '';
+                document.getElementById('detailsLtp').textContent = this.getAttribute('data-ltp') || '-';
+                document.getElementById('detailsDividend').textContent = this.getAttribute('data-dividend') || '-';
+                document.getElementById('detailsExDate').textContent = this.getAttribute('data-exdate') || '-';
+                document.getElementById('detailsAnn').textContent = this.getAttribute('data-announcement') || '-';
+                document.getElementById('detailsTitle').textContent = this.getAttribute('data-title') || '';
+                modal.style.display = 'flex';
+                document.getElementById('closeDetails').onclick = () => { modal.style.display = 'none'; };
+            });
+        });
+    </script>
+</body>
+
+</html>

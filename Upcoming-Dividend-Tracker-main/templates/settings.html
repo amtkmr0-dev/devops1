@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Settings</h2>
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{{ url_for('settings') }}">
+                <div style="margin-bottom:0.8rem;">
+                    <label style="display:block;font-weight:600;margin-bottom:0.3rem;">Full name</label>
+                    <input name="full_name" value="{{ user.first_name or '' }} {{ user.last_name or '' }}"
+                        style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:6px;" />
+                </div>
+                <div style="margin-bottom:0.8rem;">
+                    <label style="display:block;font-weight:600;margin-bottom:0.3rem;">Email</label>
+                    <input name="email" value="{{ user.email or '' }}"
+                        style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:6px;" />
+                </div>
+                <div style="margin-bottom:0.8rem;">
+                    <label style="display:block;font-weight:600;margin-bottom:0.3rem;">Phone</label>
+                    <input name="phone" value="{{ user.phone or '' }}"
+                        style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:6px;" />
+                </div>
+                <div style="margin-bottom:0.8rem;display:flex;align-items:center;gap:0.6rem;">
+                    <label style="font-weight:600;">Theme</label>
+                    <select name="theme" style="padding:0.45rem;border:1px solid var(--border);border-radius:6px;">
+                        <option value="light" {% if (user.theme or 'light' )=='light' %}selected{% endif %}>Light
+                        </option>
+                        <option value="dark" {% if (user.theme or 'light' )=='dark' %}selected{% endif %}>Dark</option>
+                    </select>
+                </div>
+                <div style="margin-top:1rem;display:flex;gap:0.6rem;">
+                    <button class="btn" type="submit">Save</button>
+                    <a href="{{ url_for('modern_dashboard') }}" class="muted" style="align-self:center">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Home — Dividend Scanner{% endblock %}
+{% block content %}
+<div style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap">
+    <div style="flex:1;min-width:280px">
+        <h2 style="margin-top:0">Stay ahead of dividend events</h2>
+        <p class="muted">Track upcoming ex-dates, announcements and dividend amounts for Indian equities. Create a
+            watchlist, manage alerts and analyze recent dividend history.</p>
+        <p style="margin-top:1.2rem">
+            <a href="/modern" class="button">Open Dashboard</a>
+            <a href="/register" style="margin-left:0.8rem" class="button" aria-label="Register">Get Started</a>
+        </p>
+    </div>
+    <div style="flex:1;min-width:320px">
+        <div style="background:#fff;border-radius:12px;padding:1.2rem;border:1px solid #eef2f6">
+            <h4 style="margin:0 0 0.6rem 0">Latest Dividend Highlights</h4>
+            <ul style="margin:0;padding:0 0 0 1.1rem;color:var(--muted)">
+                <li>Auto-parsed ex-dates from exchange feed</li>
+                <li>Lightweight watchlist and calculator</li>
+                <li>Export / email alerts (coming soon)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
